@@ -1,0 +1,67 @@
+# OS & IDE
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.buildpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# PHP & Development
+vendor/
+composer.lock
+.php_cs.cache
+.phpunit.result.cache
+phpdoc/
+build/
+
+# Node & Build Tools
+node_modules/
+npm-debug.log
+yarn-error.log
+.npmrc
+dist/
+.parcel-cache/
+
+# Testing
+coverage/
+.coverage
+tests/reports/
+
+# Local Configuration
+local.php
+.env
+.env.local
+*.local
+
+# Temporary Files
+*.tmp
+*.bak
+*.backup
+.~*
+
+# Logs
+*.log
+logs/
+
+# Private Keys
+*.pem
+*.key
+*.crt
+
+# Moodle Specific
+moodledata/
+/moodle/
+config.php
+
+# Package files
+*.zip
+*.tar.gz
+*.rar
