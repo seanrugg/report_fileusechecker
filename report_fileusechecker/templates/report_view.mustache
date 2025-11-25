@@ -1,0 +1,140 @@
+<div class="report_fileusechecker">
+    <div class="row">
+        <div class="col-12">
+            <h1>{{#str}}title, report_fileusechecker{{/str}}</h1>
+            <p class="lead text-muted">{{#str}}description, report_fileusechecker{{/str}}</p>
+        </div>
+    </div>
+
+    {{^has_unused_files}}
+        {{! Display a success message when no unused files are found }}
+        <div class="alert alert-success mt-4">
+            <i class="icon fa fa-check-circle fa-fw mr-2" aria-hidden="true"></i>
+            {{#str}}no_unused_files, report_fileusechecker{{/str}}
+        </div>
+    {{/has_unused_files}}
+
+    {{#has_unused_files}}
+        <div class="card my-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="card-title h5 mb-0">{{#str}}unused_files_summary, report_fileusechecker{{/str}}</h2>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="h4 text-primary">{{summary_stats.totalfiles}}</h3>
+                            <p class="text-muted mb-0">{{#str}}total_unused_files, report_fileusechecker{{/str}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="h4 text-primary">{{summary_stats.totalsize}}</h3>
+                            <p class="text-muted mb-0">{{#str}}total_file_size, report_fileusechecker{{/str}}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 border rounded">
+                            <h3 class="h4 text-primary">{{summary_stats.totalactivities}}</h3>
+                            <p class="text-muted mb-0">{{#str}}affected_activities, report_fileusechecker{{/str}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="fileusechecker-form" method="post" action="{{{deleteurl}}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+
+            {{#can_delete}}
+                {{! Action Bar }}
+                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light border rounded">
+                    <div>
+                        <button type="button" class="btn btn-secondary mr-2" id="select-all-btn">{{#str}}select_all, report_fileusechecker{{/str}}</button>
+                        <button type="button" class="btn btn-secondary" id="deselect-all-btn">{{#str}}deselect_all, report_fileusechecker{{/str}}</button>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-danger" id="delete-selected-btn" disabled>
+                            <i class="icon fa fa-trash fa-fw" aria-hidden="true"></i>
+                            {{#str}}delete_selected, report_fileusechecker{{/str}} (<span id="selected-count">0</span>)
+                        </button>
+                    </div>
+                </div>
+            {{/can_delete}}
+
+            <h2 class="h5 mt-4">{{#str}}unused_files_list, report_fileusechecker{{/str}}</h2>
+
+            {{! File List Table }}
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            {{#can_delete}}
+                                <th scope="col" class="w-auto">{{#str}}select, report_fileusechecker{{/str}}</th>
+                            {{/can_delete}}
+                            <th scope="col" class="w-auto">{{#str}}file_name, report_fileusechecker{{/str}}</th>
+                            <th scope="col" class="w-auto">{{#str}}file_size, report_fileusechecker{{/str}}</th>
+                            <th scope="col" class="w-25">{{#str}}location, report_fileusechecker{{/str}}</th>
+                            <th scope="col" class="w-auto">{{#str}}activity_type, report_fileusechecker{{/str}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{! Iterate over the list of unused files, rendering each with a sub-template }}
+                        {{#unused_files}}
+                            {{> report_fileusechecker/file_list_item}}
+                        {{/unused_files}}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    {{/has_unused_files}}
+
+</div>
+
+<script type="text/javascript">
+require(['jquery', 'core/notification'], function($, notification) {
+    var $form = $('#fileusechecker-form');
+    var $checkboxes = $form.find('input[type="checkbox"][name^="fileids"]');
+    var $deleteBtn = $('#delete-selected-btn');
+    var $selectedCount = $('#selected-count');
+
+    function updateDeleteButton() {
+        var count = $checkboxes.filter(':checked').length;
+        $selectedCount.text(count);
+        $deleteBtn.prop('disabled', count === 0);
+    }
+
+    // Handle individual checkbox change
+    $checkboxes.on('change', updateDeleteButton);
+
+    // Handle Select All
+    $('#select-all-btn').on('click', function() {
+        $checkboxes.prop('checked', true).trigger('change');
+    });
+
+    // Handle Deselect All
+    $('#deselect-all-btn').on('click', function() {
+        $checkboxes.prop('checked', false).trigger('change');
+    });
+
+    // Handle form submission for deletion with confirmation
+    $form.on('submit', function(e) {
+        var count = $checkboxes.filter(':checked').length;
+
+        if (count === 0) {
+            e.preventDefault();
+            return;
+        }
+
+        var message = '{{#js}}
+            {{#str}}delete_confirmation, report_fileusechecker{{/str}}
+        {{/js}}'.replace('{$a}', count);
+
+        if (!confirm(message)) {
+            e.preventDefault();
+        }
+    });
+
+    updateDeleteButton(); // Initial check
+});
+</script>
