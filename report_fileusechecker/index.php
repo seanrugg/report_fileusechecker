@@ -1,85 +1,77 @@
 <?php
 /**
- * Main entry point for the File Use Checker course report.
+ * Main entry point for the File Use Checker Report.
  *
  * @package    report_fileusechecker
- * @copyright  2025 Your Name
+ * @copyright  2025 Sean Rugge
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once('../../config.php');
-require_once($CFG->libdir . '/adminlib.php');
-require_once('classes/report.php');
-require_once('classes/output/page_renderable.php');
-
 use report_fileusechecker\report;
 use report_fileusechecker\output\page_renderable;
-use core\output\notification;
+use core\notification;
 
-// 1. Get Course and Context
+require_once(__DIR__ . '/../../config.php');
+
 $courseid = required_param('id', PARAM_INT);
-$course = get_course($courseid);
+$fileids = optional_param_array('fileids', array(), PARAM_INT);
+$action = optional_param('action', '', PARAM_ALPHA);
+$sesskey = optional_param('sesskey', '', PARAM_RAW);
+
+// 1. Check Course and Context
+if (!$course = $DB->get_record('course', array('id' => $courseid))) {
+    print_error('invalidcourseid');
+}
 $context = context_course::instance($courseid);
 
-// 2. Check capabilities
-require_capability('report/fileusechecker:view', $context);
+// 2. Check View Capability
+require_login($course, false);
 
-// 3. Setup Page
+$report = new report($courseid); 
+if (!$report->can_view()) {
+    print_error('nopermissions', 'error', '', 'report/fileusechecker:view');
+}
+
+// 3. Process Delete Action (if any)
+if ($action === 'delete' && !empty($fileids) && confirm_sesskey($sesskey) && $report->can_delete()) {
+    $deletedcount = 0;
+    try {
+        // FIX: The delete_files method in report.php needs to be implemented to accept $fileids
+        $deletedcount = $report->delete_files($fileids);
+        
+        // Successful deletion, redirect to clear POST data and show message.
+        redirect(new moodle_url('/report/fileusechecker/index.php', 
+            array('id' => $courseid, 'deletedcount' => $deletedcount)), 
+            null, 0);
+
+    } catch (Exception $e) {
+        // Handle deletion errors.
+        notification::error(get_string('delete_failed', 'report_fileusechecker', $e->getMessage()));
+    }
+}
+
+// 4. Setup Page Navigation and Breadcrumbs
 $reportname = get_string('pluginname', 'report_fileusechecker');
 $PAGE->set_url('/report/fileusechecker/index.php', ['id' => $courseid]);
 $PAGE->set_title(format_string($course->fullname) . ': ' . $reportname);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
 
-// Course administration is the default navigation for course reports
+// Crucial: Set up navigation/breadcrumbs (redundant if lib.php works, but good practice)
 $courseadminnode = $PAGE->navigation->add(get_string('courseadministration'));
-$reportnode = $courseadminnode->add(get_string('reports'), null, navigation_node::TYPE_CONTAINER);
-$reportnode->add($reportname);
+$reportnode = $courseadminnode->add(get_string('reports'), null, \navigation_node::TYPE_CONTAINER);
+$reportnode->add($reportname, new \moodle_url('/report/fileusechecker/index.php', ['id' => $courseid]));
 
-$renderer = $PAGE->get_renderer('report_fileusechecker');
-$file_report = new report();
-$message = null; // Variable to hold success/error messages
 
-// 4. Handle Deletion Form Submission
-if (data_submitted() && confirm_sesskey()) {
-    $can_delete = has_capability('report/fileusechecker:delete', $context);
-    $fileids = optional_param_array('fileids', array(), PARAM_INT);
-
-    if ($can_delete && !empty($fileids)) {
-        try {
-            $deletedcount = $file_report->delete_files($fileids, $context);
-            if ($deletedcount > 0) {
-                $a = new \stdClass();
-                $a->count = $deletedcount;
-                // Log the action.
-                $event = \core\event\report_viewed::create([
-                    'context' => $context,
-                    'other' => ['deleted_count' => $deletedcount, 'file_ids' => $fileids],
-                ]);
-                $event->trigger();
-
-                $message = new notification(get_string('delete_success', 'report_fileusechecker', $deletedcount), \core\output\notification::SUCCESS);
-            }
-        } catch (\Exception $e) {
-            $message = new notification(get_string('delete_error', 'report_fileusechecker'), \core\output\notification::ERROR);
-            \core\session\manager::get_exception_handler()->handle_exception($e);
-        }
-    } else if (!empty($fileids)) {
-        // User attempted deletion without capability.
-        $message = new notification(get_string('nopermissions', 'error'), \core\output\notification::ERROR);
-    }
-}
-
-// 5. Output Header and Content
-echo $OUTPUT->header();
-
-// Display success/error messages if any.
-if (!empty($message)) {
-    echo $renderer->render($message);
-}
-
-// Render the main report.
+// 5. Get data and Render
+// The renderable object fetches its own data inside its constructor.
 $renderable = new page_renderable($courseid);
-echo $renderer->render_report($renderable);
 
-echo $OUTPUT->footer();
+// Check for and display success message after a redirect
+$deletedcount = optional_param('deletedcount', 0, PARAM_INT);
+if ($deletedcount > 0) {
+    notification::success(get_string('delete_success', 'report_fileusechecker', $deletedcount));
+}
+
+// 6. Echo the output
+echo $PAGE->get_renderer('report_fileusechecker')->render_page($renderable);
