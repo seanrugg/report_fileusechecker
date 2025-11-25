@@ -1,0 +1,100 @@
+/**
+ * Styling for the File Use Checker Report (report_fileusechecker)
+ *
+ * @package    report_fileusechecker
+ * @copyright  2025 Your Name
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/* General Report Container */
+.report_fileusechecker {
+    padding: 20px;
+}
+
+/* --- Summary Statistics Card --- */
+.report_fileusechecker .card-header {
+    background-color: #007bff; /* Primary Moodle-like blue */
+}
+
+.report_fileusechecker .card-title {
+    font-weight: 600;
+}
+
+.report_fileusechecker .card-body .border.rounded {
+    transition: background-color 0.3s ease;
+    border: 1px solid #dee2e6 !important;
+    padding: 15px;
+}
+
+.report_fileusechecker .card-body .border.rounded:hover {
+    background-color: #f8f9fa; /* Light hover background */
+}
+
+.report_fileusechecker .card-body h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #007bff;
+    margin-bottom: 0.2rem;
+}
+
+.report_fileusechecker .card-body p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+/* --- Action Bar --- */
+.report_fileusechecker .d-flex.bg-light {
+    border: 1px solid #e9ecef;
+}
+
+/* Delete Button styling */
+#delete-selected-btn {
+    font-weight: 600;
+    background-color: #dc3545; /* Danger red */
+    border-color: #dc3545;
+}
+
+#delete-selected-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* --- File List Table --- */
+.report_fileusechecker table {
+    margin-top: 15px;
+    border: 1px solid #dee2e6;
+}
+
+.report_fileusechecker thead th {
+    background-color: #e9ecef;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.report_fileusechecker tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.report_fileusechecker td {
+    vertical-align: middle;
+    padding: 0.75rem;
+}
+
+/* Text Truncation for File Name */
+.report_fileusechecker td:nth-child(2) {
+    max-width: 350px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.report_fileusechecker td strong {
+    font-weight: 500;
+    display: block;
+}
+
+/* Filepath smaller text */
+.report_fileusechecker td .small.d-block {
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
