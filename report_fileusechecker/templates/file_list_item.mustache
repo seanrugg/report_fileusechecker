@@ -1,0 +1,22 @@
+<tr>
+    {{#can_delete}}
+        <td class="align-middle">
+            <input type="checkbox" name="fileids[]" value="{{fileid}}" aria-label="{{filename}}">
+        </td>
+    {{/can_delete}}
+    <td class="align-middle text-truncate" style="max-width: 300px;">
+        <i class="icon fa fa-file-o fa-fw mr-1" aria-hidden="true"></i>
+        <strong>{{filename}}</strong>
+        {{#filepath}}
+            <span class="text-muted small d-block">{{filepath}}</span>
+        {{/filepath}}
+    </td>
+    <td class="align-middle">{{filesizeformatted}}</td>
+    <td class="align-middle">
+        <a href="{{{locationurl}}}" target="_blank" title="{{locationname}}">
+            <i class="icon fa fa-external-link fa-fw mr-1" aria-hidden="true"></i>
+            {{locationname}}
+        </a>
+    </td>
+    <td class="align-middle text-muted">{{activitytype}}</td>
+</tr>
