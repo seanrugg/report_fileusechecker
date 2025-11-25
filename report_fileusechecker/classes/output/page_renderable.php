@@ -3,7 +3,7 @@
  * Data structure for rendering the File Use Checker report page.
  *
  * @package    report_fileusechecker
- * @copyright  2025 Your Name
+ * @copyright  2025 Sean Rugge
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -19,7 +19,7 @@ use context_course;
 /**
  * Page renderable class for the File Use Checker report.
  *
- * @copyright  2025 Your Name
+ * @copyright  2025 Sean Rugge
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class page_renderable implements renderable, templatable {
