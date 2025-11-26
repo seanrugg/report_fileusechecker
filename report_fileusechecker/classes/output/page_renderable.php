@@ -116,7 +116,7 @@ class page_renderable implements renderable, templatable {
         ));
 
         $data['refresh_url'] = new \moodle_url('/report/fileusechecker/index.php', array(
-            'courseid' => $this->courseid,
+            'id' => $this->courseid,
         ));
 
         return $data;
