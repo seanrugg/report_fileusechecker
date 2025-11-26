@@ -213,9 +213,16 @@ class file_scanner {
         $files = array();
 
         try {
+            // Determine component name based on context type
+            $component = $this->get_context_component($context);
+            
+            if (empty($component)) {
+                return $files;
+            }
+
             $stored_files = $fs->get_area_files(
                 $context->id,
-                $context->get_component_name(),
+                $component,
                 $filearea,
                 false,
                 'id',
@@ -230,6 +237,26 @@ class file_scanner {
         }
 
         return $files;
+    }
+
+    /**
+     * Get component name for a given context
+     *
+     * @param context $context The context object
+     * @return string Component name (e.g., 'mod_assign', 'course', etc.)
+     */
+    private function get_context_component($context) {
+        if ($context instanceof \context_course) {
+            return 'course';
+        } else if ($context instanceof \context_module) {
+            // For module contexts, we need to get the module name from the course module
+            $cm = get_coursemodule_from_id(null, $context->instanceid, null, false, MUST_EXIST);
+            return 'mod_' . $cm->modname;
+        } else if ($context instanceof \context_system) {
+            return 'core';
+        }
+        
+        return '';
     }
 
     /**
