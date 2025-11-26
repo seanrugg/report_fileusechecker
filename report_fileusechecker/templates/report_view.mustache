@@ -36,15 +36,15 @@
     </div>
 
     {{! No Files Found Section }}
-    {{#unless has_unused_files}}
+    {{^has_unused_files}}
     <div class="alert alert-success alert-icon" role="alert">
         <i class="fa fa-check-circle"></i>
         <span>{{no_files_message}}</span>
     </div>
-    {{/unless}}
+    {{/has_unused_files}}
 
     {{! Summary Section }}
-    {{#if has_unused_files}}
+    {{#has_unused_files}}
     <div class="summary-section mb-4">
         <div class="row">
             {{! Total Unused Files Card }}
@@ -118,7 +118,7 @@
         </div>
 
         {{! Action Buttons }}
-        {{#if can_delete}}
+        {{#can_delete}}
         <div class="action-buttons-wrapper mb-3">
             <div class="btn-group-custom d-flex gap-2">
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="select-all-btn">
@@ -133,18 +133,18 @@
                 </button>
             </div>
         </div>
-        {{/if}}
+        {{/can_delete}}
 
         {{! Files Table }}
         <div class="table-responsive">
             <table class="table table-hover table-striped file-table" id="unused-files-table">
                 <thead class="table-header-sticky">
                     <tr>
-                        {{#if can_delete}}
+                        {{#can_delete}}
                         <th class="text-center" style="width: 40px;">
                             <input type="checkbox" id="select-all-checkbox" class="form-check-input">
                         </th>
-                        {{/if}}
+                        {{/can_delete}}
                         <th class="file-name-column">
                             {{#str}}file_name{{/str}}
                         </th>
@@ -162,12 +162,12 @@
                 <tbody id="files-tbody">
                     {{#files}}
                     <tr class="file-row" data-fileid="{{fileid}}">
-                        {{#if ../can_delete}}
+                        {{#../can_delete}}
                         <td class="text-center">
                             <input type="checkbox" class="file-checkbox form-check-input" 
                                    value="{{fileid}}" data-fileid="{{fileid}}">
                         </td>
-                        {{/if}}
+                        {{/../can_delete}}
                         <td class="file-name-column">
                             <i class="fa fa-file-o file-icon"></i>
                             <span class="file-name">{{filename}}</span>
@@ -192,7 +192,7 @@
     </div>
 
     {{! Delete Confirmation Modal }}
-    {{#if can_delete}}
+    {{#can_delete}}
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" 
          aria-labelledby="deleteConfirmLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -223,7 +223,7 @@
             </div>
         </div>
     </div>
-    {{/if}}
+    {{/can_delete}}
 
     {{! Loading Indicator }}
     <div id="loadingIndicator" class="alert alert-info text-center" style="display: none;">
@@ -245,6 +245,7 @@
     </div>
 
 </div>
+{{/has_unused_files}}
 
 {{! JavaScript }}
 <script>
@@ -258,12 +259,12 @@ require(['jquery', 'core/notification', 'core/modal_factory'], function($, Notif
         selectedFiles: new Set(),
 
         init: function() {
-            {{#if can_delete}}
+            {{#can_delete}}
             this.bindSelectAllCheckbox();
             this.bindFileCheckboxes();
             this.bindDeleteButton();
             this.bindConfirmDeleteButton();
-            {{/if}}
+            {{/can_delete}}
         },
 
         bindSelectAllCheckbox: function() {
