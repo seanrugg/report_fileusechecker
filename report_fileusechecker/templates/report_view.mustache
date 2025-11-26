@@ -1,140 +1,411 @@
-<div class="report_fileusechecker">
-    <div class="row">
-        <div class="col-12">
-            <h1>{{#str}}title, report_fileusechecker{{/str}}</h1>
-            <p class="lead text-muted">{{#str}}description, report_fileusechecker{{/str}}</p>
+{{!
+    File Use Checker Report Main Template
+    
+    Context variables:
+    - courseid: Course ID
+    - coursename: Course full name
+    - title: Report title
+    - description: Report description
+    - has_unused_files: Boolean whether there are unused files
+    - can_delete: Boolean whether user can delete files
+    - summary: Summary statistics object
+    - files: Array of file objects
+    - no_files_message: Message when no files found
+    - ajax_delete_url: URL for AJAX delete operations
+    - refresh_url: URL to refresh the report
+}}
+
+<div class="report-fileusechecker">
+    {{! Header Section }}
+    <div class="report-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="report-title m-0">
+                    {{title}}
+                </h2>
+                <p class="text-muted mt-2 mb-0">
+                    {{description}}
+                </p>
+            </div>
+            <div class="report-actions">
+                <a href="{{refresh_url}}" class="btn btn-outline-primary btn-sm">
+                    <i class="fa fa-refresh"></i> {{#str}}refresh{{/str}}
+                </a>
+            </div>
         </div>
     </div>
 
-    {{^has_unused_files}}
-        {{! Display a success message when no unused files are found }}
-        <div class="alert alert-success mt-4">
-            <i class="icon fa fa-check-circle fa-fw mr-2" aria-hidden="true"></i>
-            {{#str}}no_unused_files, report_fileusechecker{{/str}}
-        </div>
-    {{/has_unused_files}}
+    {{! No Files Found Section }}
+    {{#unless has_unused_files}}
+    <div class="alert alert-success alert-icon" role="alert">
+        <i class="fa fa-check-circle"></i>
+        <span>{{no_files_message}}</span>
+    </div>
+    {{/unless}}
 
-    {{#has_unused_files}}
-        <div class="card my-4">
-            <div class="card-header bg-primary text-white">
-                <h2 class="card-title h5 mb-0">{{#str}}unused_files_summary, report_fileusechecker{{/str}}</h2>
+    {{! Summary Section }}
+    {{#if has_unused_files}}
+    <div class="summary-section mb-4">
+        <div class="row">
+            {{! Total Unused Files Card }}
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-card card">
+                    <div class="card-body">
+                        <div class="summary-icon">
+                            <i class="fa fa-file"></i>
+                        </div>
+                        <div class="summary-content">
+                            <p class="summary-label">{{#str}}unused_files_list{{/str}}</p>
+                            <p class="summary-value">{{summary.total_files}}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-4 mb-3">
-                        <div class="p-3 border rounded">
-                            <h3 class="h4 text-primary">{{summary_stats.totalfiles}}</h3>
-                            <p class="text-muted mb-0">{{#str}}total_unused_files, report_fileusechecker{{/str}}</p>
+
+            {{! Total File Size Card }}
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-card card">
+                    <div class="card-body">
+                        <div class="summary-icon">
+                            <i class="fa fa-database"></i>
+                        </div>
+                        <div class="summary-content">
+                            <p class="summary-label">{{#str}}total_file_size{{/str}}</p>
+                            <p class="summary-value">{{summary.total_size_formatted}}</p>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="p-3 border rounded">
-                            <h3 class="h4 text-primary">{{summary_stats.totalsize}}</h3>
-                            <p class="text-muted mb-0">{{#str}}total_file_size, report_fileusechecker{{/str}}</p>
+                </div>
+            </div>
+
+            {{! Affected Activities Card }}
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-card card">
+                    <div class="card-body">
+                        <div class="summary-icon">
+                            <i class="fa fa-cubes"></i>
+                        </div>
+                        <div class="summary-content">
+                            <p class="summary-label">{{#str}}affected_activities{{/str}}</p>
+                            <p class="summary-value">{{summary.affected_activities_count}}</p>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="p-3 border rounded">
-                            <h3 class="h4 text-primary">{{summary_stats.totalactivities}}</h3>
-                            <p class="text-muted mb-0">{{#str}}affected_activities, report_fileusechecker{{/str}}</p>
+                </div>
+            </div>
+
+            {{! Scan Status Card }}
+            <div class="col-md-3 col-sm-6 mb-3">
+                <div class="summary-card card">
+                    <div class="card-body">
+                        <div class="summary-icon">
+                            <i class="fa fa-info-circle"></i>
+                        </div>
+                        <div class="summary-content">
+                            <p class="summary-label">{{#str}}scan_complete{{/str}}</p>
+                            <p class="summary-value" id="scan-timestamp">
+                                <small>{{#str}}now{{/str}}</small>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <form id="fileusechecker-form" method="post" action="{{{deleteurl}}}">
-            <input type="hidden" name="sesskey" value="{{sesskey}}">
+    {{! Files Table Section }}
+    <div class="files-table-section">
+        <div class="section-header mb-3">
+            <h3 class="section-title">{{#str}}unused_files_list{{/str}}</h3>
+        </div>
 
-            {{#can_delete}}
-                {{! Action Bar }}
-                <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light border rounded">
-                    <div>
-                        <button type="button" class="btn btn-secondary mr-2" id="select-all-btn">{{#str}}select_all, report_fileusechecker{{/str}}</button>
-                        <button type="button" class="btn btn-secondary" id="deselect-all-btn">{{#str}}deselect_all, report_fileusechecker{{/str}}</button>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-danger" id="delete-selected-btn" disabled>
-                            <i class="icon fa fa-trash fa-fw" aria-hidden="true"></i>
-                            {{#str}}delete_selected, report_fileusechecker{{/str}} (<span id="selected-count">0</span>)
-                        </button>
+        {{! Action Buttons }}
+        {{#if can_delete}}
+        <div class="action-buttons-wrapper mb-3">
+            <div class="btn-group-custom d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="select-all-btn">
+                    <i class="fa fa-check-square-o"></i> {{#str}}select_all{{/str}}
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="deselect-all-btn">
+                    <i class="fa fa-square-o"></i> {{#str}}deselect_all{{/str}}
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" id="delete-selected-btn" disabled>
+                    <i class="fa fa-trash"></i> {{#str}}delete_selected{{/str}}
+                    <span class="badge badge-light" id="selected-count" style="display: none;">0</span>
+                </button>
+            </div>
+        </div>
+        {{/if}}
+
+        {{! Files Table }}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped file-table" id="unused-files-table">
+                <thead class="table-header-sticky">
+                    <tr>
+                        {{#if can_delete}}
+                        <th class="text-center" style="width: 40px;">
+                            <input type="checkbox" id="select-all-checkbox" class="form-check-input">
+                        </th>
+                        {{/if}}
+                        <th class="file-name-column">
+                            {{#str}}file_name{{/str}}
+                        </th>
+                        <th class="file-size-column" style="width: 100px;">
+                            {{#str}}file_size{{/str}}
+                        </th>
+                        <th class="activity-type-column" style="width: 120px;">
+                            {{#str}}activity_type{{/str}}
+                        </th>
+                        <th class="location-column">
+                            {{#str}}location{{/str}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="files-tbody">
+                    {{#files}}
+                    <tr class="file-row" data-fileid="{{fileid}}">
+                        {{#if ../can_delete}}
+                        <td class="text-center">
+                            <input type="checkbox" class="file-checkbox form-check-input" 
+                                   value="{{fileid}}" data-fileid="{{fileid}}">
+                        </td>
+                        {{/if}}
+                        <td class="file-name-column">
+                            <i class="fa fa-file-o file-icon"></i>
+                            <span class="file-name">{{filename}}</span>
+                        </td>
+                        <td class="file-size-column">
+                            <span class="badge badge-info">{{filesize}}</span>
+                        </td>
+                        <td class="activity-type-column">
+                            <span class="badge badge-secondary">{{activitytype}}</span>
+                        </td>
+                        <td class="location-column">
+                            <a href="{{locationurl}}" target="_blank" rel="noopener noreferrer" class="location-link">
+                                {{location}}
+                                <i class="fa fa-external-link-alt ml-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {{/files}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{! Delete Confirmation Modal }}
+    {{#if can_delete}}
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" role="dialog" 
+         aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmLabel">
+                        <i class="fa fa-warning text-danger"></i> {{#str}}confirm{{/str}}
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteConfirmMessage"></p>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fa fa-info-circle"></i>
+                        <span>{{#str}}delete_info{{/str}}</span>
                     </div>
                 </div>
-            {{/can_delete}}
-
-            <h2 class="h5 mt-4">{{#str}}unused_files_list, report_fileusechecker{{/str}}</h2>
-
-            {{! File List Table }}
-            <div class="table-responsive">
-                <table class="table table-hover table-striped">
-                    <thead>
-                        <tr>
-                            {{#can_delete}}
-                                <th scope="col" class="w-auto">{{#str}}select, report_fileusechecker{{/str}}</th>
-                            {{/can_delete}}
-                            <th scope="col" class="w-auto">{{#str}}file_name, report_fileusechecker{{/str}}</th>
-                            <th scope="col" class="w-auto">{{#str}}file_size, report_fileusechecker{{/str}}</th>
-                            <th scope="col" class="w-25">{{#str}}location, report_fileusechecker{{/str}}</th>
-                            <th scope="col" class="w-auto">{{#str}}activity_type, report_fileusechecker{{/str}}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{! Iterate over the list of unused files, rendering each with a sub-template }}
-                        {{#unused_files}}
-                            {{> report_fileusechecker/file_list_item}}
-                        {{/unused_files}}
-                    </tbody>
-                </table>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        {{#str}}cancel{{/str}}
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fa fa-trash"></i> {{#str}}delete{{/str}}
+                    </button>
+                </div>
             </div>
-        </form>
-    {{/has_unused_files}}
+        </div>
+    </div>
+    {{/if}}
+
+    {{! Loading Indicator }}
+    <div id="loadingIndicator" class="alert alert-info text-center" style="display: none;">
+        <i class="fa fa-spinner fa-spin"></i> {{#str}}loading{{/str}}
+    </div>
+
+    {{! Error Alert }}
+    <div id="errorAlert" class="alert alert-danger" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="fa fa-exclamation-circle"></i>
+        <span id="errorMessage"></span>
+    </div>
+
+    {{! Success Alert }}
+    <div id="successAlert" class="alert alert-success" style="display: none;">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="fa fa-check-circle"></i>
+        <span id="successMessage"></span>
+    </div>
 
 </div>
 
-<script type="text/javascript">
-require(['jquery', 'core/notification'], function($, notification) {
-    var $form = $('#fileusechecker-form');
-    var $checkboxes = $form.find('input[type="checkbox"][name^="fileids"]');
-    var $deleteBtn = $('#delete-selected-btn');
-    var $selectedCount = $('#selected-count');
+{{! JavaScript }}
+<script>
+require(['jquery', 'core/notification', 'core/modal_factory'], function($, Notification, ModalFactory) {
+    'use strict';
 
-    function updateDeleteButton() {
-        var count = $checkboxes.filter(':checked').length;
-        $selectedCount.text(count);
-        $deleteBtn.prop('disabled', count === 0);
-    }
+    const fileChecker = {
+        courseid: {{courseid}},
+        can_delete: {{can_delete}},
+        ajaxUrl: '{{ajax_delete_url}}',
+        selectedFiles: new Set(),
 
-    // Handle individual checkbox change
-    $checkboxes.on('change', updateDeleteButton);
+        init: function() {
+            {{#if can_delete}}
+            this.bindSelectAllCheckbox();
+            this.bindFileCheckboxes();
+            this.bindDeleteButton();
+            this.bindConfirmDeleteButton();
+            {{/if}}
+        },
 
-    // Handle Select All
-    $('#select-all-btn').on('click', function() {
-        $checkboxes.prop('checked', true).trigger('change');
-    });
+        bindSelectAllCheckbox: function() {
+            const self = this;
+            $('#select-all-checkbox').on('change', function() {
+                const isChecked = $(this).is(':checked');
+                $('.file-checkbox').prop('checked', isChecked).trigger('change');
+            });
 
-    // Handle Deselect All
-    $('#deselect-all-btn').on('click', function() {
-        $checkboxes.prop('checked', false).trigger('change');
-    });
+            $('#select-all-btn').on('click', function(e) {
+                e.preventDefault();
+                $('#select-all-checkbox').prop('checked', true).trigger('change');
+            });
 
-    // Handle form submission for deletion with confirmation
-    $form.on('submit', function(e) {
-        var count = $checkboxes.filter(':checked').length;
+            $('#deselect-all-btn').on('click', function(e) {
+                e.preventDefault();
+                $('#select-all-checkbox').prop('checked', false).trigger('change');
+                $('.file-checkbox').prop('checked', false).trigger('change');
+            });
+        },
 
-        if (count === 0) {
-            e.preventDefault();
-            return;
+        bindFileCheckboxes: function() {
+            const self = this;
+            $(document).on('change', '.file-checkbox', function() {
+                const fileid = $(this).val();
+                if ($(this).is(':checked')) {
+                    self.selectedFiles.add(fileid);
+                } else {
+                    self.selectedFiles.delete(fileid);
+                }
+                self.updateDeleteButton();
+                self.updateSelectAllCheckbox();
+            });
+        },
+
+        bindDeleteButton: function() {
+            const self = this;
+            $('#delete-selected-btn').on('click', function(e) {
+                e.preventDefault();
+                if (self.selectedFiles.size > 0) {
+                    self.showDeleteConfirmation();
+                }
+            });
+        },
+
+        bindConfirmDeleteButton: function() {
+            const self = this;
+            $('#confirmDeleteBtn').on('click', function(e) {
+                e.preventDefault();
+                $('#deleteConfirmModal').modal('hide');
+                self.deleteSelectedFiles();
+            });
+        },
+
+        showDeleteConfirmation: function() {
+            const message = '{{#str}}delete_confirmation{{/str}}'.replace('{$a}', this.selectedFiles.size);
+            $('#deleteConfirmMessage').html(message);
+            $('#deleteConfirmModal').modal('show');
+        },
+
+        deleteSelectedFiles: function() {
+            const self = this;
+            const fileids = Array.from(this.selectedFiles);
+
+            this.showLoading();
+
+            $.ajax({
+                type: 'POST',
+                url: this.ajaxUrl,
+                data: {
+                    action: 'delete',
+                    fileids: fileids,
+                    sesskey: '{{sesskey}}'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    self.hideLoading();
+                    if (response.success) {
+                        self.showSuccess(response.message);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        self.showError(response.message);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    self.hideLoading();
+                    self.showError('{{#str}}delete_error{{/str}}');
+                }
+            });
+        },
+
+        updateDeleteButton: function() {
+            const count = this.selectedFiles.size;
+            if (count > 0) {
+                $('#delete-selected-btn').prop('disabled', false);
+                $('#selected-count').text(count).show();
+            } else {
+                $('#delete-selected-btn').prop('disabled', true);
+                $('#selected-count').hide();
+            }
+        },
+
+        updateSelectAllCheckbox: function() {
+            const total = $('.file-checkbox').length;
+            const checked = $('.file-checkbox:checked').length;
+            if (checked === total && total > 0) {
+                $('#select-all-checkbox').prop('checked', true).prop('indeterminate', false);
+            } else if (checked > 0) {
+                $('#select-all-checkbox').prop('indeterminate', true);
+            } else {
+                $('#select-all-checkbox').prop('checked', false).prop('indeterminate', false);
+            }
+        },
+
+        showLoading: function() {
+            $('#loadingIndicator').show();
+            $('#delete-selected-btn').prop('disabled', true);
+        },
+
+        hideLoading: function() {
+            $('#loadingIndicator').hide();
+            this.updateDeleteButton();
+        },
+
+        showError: function(message) {
+            $('#errorMessage').text(message);
+            $('#errorAlert').show();
+            setTimeout(function() {
+                $('#errorAlert').fadeOut();
+            }, 5000);
+        },
+
+        showSuccess: function(message) {
+            $('#successMessage').text(message);
+            $('#successAlert').show();
         }
+    };
 
-        var message = '{{#js}}
-            {{#str}}delete_confirmation, report_fileusechecker{{/str}}
-        {{/js}}'.replace('{$a}', count);
-
-        if (!confirm(message)) {
-            e.preventDefault();
-        }
+    $(document).ready(function() {
+        fileChecker.init();
     });
-
-    updateDeleteButton(); // Initial check
 });
 </script>
