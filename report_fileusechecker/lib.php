@@ -15,7 +15,7 @@ defined('MOODLE_INTERNAL') || die();
  * Extend the course navigation with the File Use Checker report link
  *
  * This function is called by Moodle to allow plugins to add navigation nodes.
- * It adds a link to the File Use Checker report in the course administration menu.
+ * It adds a link to the File Use Checker report in the course navigation.
  *
  * @param navigation_node $navigation The navigation node to add to
  * @param stdClass $course The course object
@@ -26,18 +26,31 @@ function report_fileusechecker_extend_navigation_course(navigation_node $navigat
     
     // Only add the report link if the user has permission to view it
     if (has_capability('report/fileusechecker:view', $context)) {
-        // Try to find the course administration node (where reports typically go)
-        $admin_node = $navigation->find('courseadmin', navigation_node::TYPE_CONTAINER);
+        // In Moodle 5.1, reports are typically under the "More" menu or as a specific reports node
+        // We'll look for various possible nodes
         
-        if (!$admin_node) {
-            // In newer Moodle, try the 'morecoursesettings' node
-            $admin_node = $navigation->find('morecoursesettings', navigation_node::TYPE_CONTAINER);
+        $url = new moodle_url('/report/fileusechecker/index.php', array('id' => $course->id));
+        
+        // Try to find existing report nodes or containers
+        $target_node = null;
+        
+        // Look for 'coursereports' node (standard reports container)
+        $target_node = $navigation->find('coursereports', navigation_node::TYPE_CONTAINER);
+        
+        // If not found, look for 'courseadmin' node
+        if (!$target_node) {
+            $target_node = $navigation->find('courseadmin', navigation_node::TYPE_CONTAINER);
         }
         
-        if (!$admin_node) {
-            // If still not found, create the link at the top level
-            $url = new moodle_url('/report/fileusechecker/index.php', array('id' => $course->id));
-            $navigation->add(
+        // If still not found, look for 'morecoursesettings' node
+        if (!$target_node) {
+            $target_node = $navigation->find('morecoursesettings', navigation_node::TYPE_CONTAINER);
+        }
+        
+        // Add the link
+        if ($target_node) {
+            // Found a suitable container, add under it
+            $target_node->add(
                 get_string('pluginname', 'report_fileusechecker'),
                 $url,
                 navigation_node::TYPE_SETTING,
@@ -45,9 +58,9 @@ function report_fileusechecker_extend_navigation_course(navigation_node $navigat
                 'report_fileusechecker'
             );
         } else {
-            // Add under administration
-            $url = new moodle_url('/report/fileusechecker/index.php', array('id' => $course->id));
-            $admin_node->add(
+            // No suitable container found, add at the root course level
+            // This will appear at the same level as Course, Settings, Participants, etc.
+            $navigation->add(
                 get_string('pluginname', 'report_fileusechecker'),
                 $url,
                 navigation_node::TYPE_SETTING,
