@@ -29,7 +29,7 @@ $PAGE->set_heading($course->fullname);
 $PAGE->set_context(context_course::instance($courseid));
 
 // Add breadcrumb
-$PAGE->navbar->add(get_string('reports', 'moodle'), new moodle_url('/report/index.php', array('id' => $courseid)));
+$PAGE->navbar->add(get_string('reports', 'moodle'), new moodle_url('/report/view.php', array('courseid' => $courseid)));
 $PAGE->navbar->add(get_string('pluginname', 'report_fileusechecker'), $url);
 
 // Require login and course access
@@ -55,17 +55,14 @@ $can_delete = $report->can_delete();
 // Create page renderable object
 $page = new page_renderable($courseid, $unused_files, $summary_stats, $can_delete);
 
+// Add CSS
+$PAGE->requires->css('/report/fileusechecker/styles.css');
+
 // Output the page header
 echo $OUTPUT->header();
 
 // Output the report content
-echo $OUTPUT->render($page);
-
-// Add CSS
-$PAGE->requires->css('/report/fileusechecker/styles.css');
-
-// Add any necessary JS
-$PAGE->requires->js_call_amd('report_fileusechecker/report', 'init', array($courseid, $can_delete));
+echo $OUTPUT->render_from_template('report_fileusechecker/report_view', $page->export_for_template($OUTPUT));
 
 // Output the page footer
 echo $OUTPUT->footer();
