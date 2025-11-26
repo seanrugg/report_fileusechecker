@@ -8,7 +8,6 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->libdir . '/reportlib.php');
 
 use report_fileusechecker\report;
 use report_fileusechecker\output\page_renderable;
