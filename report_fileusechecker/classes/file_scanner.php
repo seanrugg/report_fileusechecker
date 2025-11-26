@@ -291,6 +291,21 @@ class file_scanner {
                 }
                 break;
 
+            case 'page':
+                // Page module - all files in content area are used
+                $files = $fs->get_area_files(
+                    $modcontext->id,
+                    'mod_page',
+                    'content',
+                    false,
+                    'id',
+                    false
+                );
+                foreach ($files as $file) {
+                    $used[] = $file->get_id();
+                }
+                break;
+
             case 'book':
                 // Book chapters contain content
                 $chapters = $DB->get_records('book_chapters', array('bookid' => $cm->instance));
