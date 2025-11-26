@@ -1,116 +1,282 @@
 <?php
 /**
- * Data structure for rendering the File Use Checker report page.
+ * Page Renderable Class
+ *
+ * Data structure for rendering the report page
  *
  * @package    report_fileusechecker
- * @copyright  2025 Sean Rugge
+ * @copyright  2025
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace report_fileusechecker\output;
 
+use renderable;
+use renderer_base;
+use templatable;
+
 defined('MOODLE_INTERNAL') || die();
 
-use renderable;
-use templatable;
-use report_fileusechecker\report;
-use context_course;
-use moodle_url;
-
 /**
- * Page renderable class for the File Use Checker report.
+ * Page renderable for File Use Checker report
  */
 class page_renderable implements renderable, templatable {
 
-    /** @var int $courseid The ID of the course being viewed. */
-    protected $courseid;
-
-    /** @var object $summary_stats Summary statistics from the report. */
-    protected $summary_stats;
-
-    /** @var array $unused_files Array of unused file objects. */
-    protected $unused_files;
-
-    /** @var context_course $context Course context. */
-    protected $context;
-
-    /** @var bool $can_delete Permission flag for file deletion. */
-    protected $can_delete;
+    /**
+     * @var int Course ID
+     */
+    private $courseid;
 
     /**
-     * Constructor.
-     *
-     * @param int $courseid The course ID.
+     * @var array Array of unused file objects
      */
-    public function __construct(int $courseid) {
-        global $USER;
+    private $unused_files;
 
+    /**
+     * @var object Summary statistics object
+     */
+    private $summary_stats;
+
+    /**
+     * @var bool Whether user can delete files
+     */
+    private $can_delete;
+
+    /**
+     * @var string Report title
+     */
+    private $title;
+
+    /**
+     * @var string Report description
+     */
+    private $description;
+
+    /**
+     * Constructor
+     *
+     * @param int $courseid Course ID
+     * @param array $unused_files Array of unused file objects
+     * @param object $summary_stats Summary statistics object
+     * @param bool $can_delete Whether user can delete files
+     */
+    public function __construct($courseid, $unused_files, $summary_stats, $can_delete = false) {
         $this->courseid = $courseid;
-        $this->context = context_course::instance($courseid);
-
-        // Check deletion capability early.
-        $this->can_delete = has_capability('report/fileusechecker:delete', $this->context, $USER->id);
-
-        // FIX: Pass $courseid to the report constructor as required by report.php
-        $report = new report($courseid);
-
-        // FIX: Call methods without $courseid argument
-        $this->unused_files = $report->get_unused_files();
-        $this->summary_stats = $report->get_summary_stats();
+        $this->unused_files = $unused_files;
+        $this->summary_stats = $summary_stats;
+        $this->can_delete = $can_delete;
+        $this->title = get_string('title', 'report_fileusechecker');
+        $this->description = get_string('description', 'report_fileusechecker');
     }
 
     /**
-     * Exports the data for mustache rendering.
+     * Export data for use in templates
      *
-     * @global \moodle_page $PAGE
-     * @return stdClass
+     * @param renderer_base $output The renderer
+     * @return array Data for template
      */
-    public function export_for_template(\renderer_base $output) {
-        $data = new \stdClass();
-        
-        $data->courseid = $this->courseid;
-        $data->sesskey = sesskey();
-        $data->can_delete = $this->can_delete;
-        $data->has_unused_files = !empty($this->unused_files);
-        
-        // This is used for the action on the page, like the bulk delete form
-        $data->deleteurl = new moodle_url('/report/fileusechecker/index.php', ['id' => $this->courseid]);
+    public function export_for_template(renderer_base $output) {
+        global $COURSE;
 
-        $data->summary_stats = $this->summary_stats;
-        $data->unused_files = [];
+        $has_files = !empty($this->unused_files) && $this->summary_stats->total_files > 0;
 
-        // Format unused files for the template.
-        foreach ($this->unused_files as $file) {
-             // Ensure files are objects (as they come from the report class)
-            $data->unused_files[] = (object) [
-                'fileid' => $file->fileid,
-                'filename' => $file->filename,
-                'filesize' => $file->filesize,
-                'filesizeformatted' => $file->filesizeformatted,
-                'location' => $file->location,
-                'locationurl' => $file->locationurl->out(false), // Convert moodle_url object to string
-                'activitytype' => $file->activitytype,
-                'can_delete' => $this->can_delete,
-            ];
+        $data = array(
+            'courseid' => $this->courseid,
+            'coursename' => $COURSE->fullname,
+            'title' => $this->title,
+            'description' => $this->description,
+            'has_unused_files' => $has_files,
+            'can_delete' => $this->can_delete,
+        );
+
+        // Add summary statistics
+        if ($has_files) {
+            $data['summary'] = array(
+                'total_files' => $this->summary_stats->total_files,
+                'total_size_formatted' => $this->summary_stats->total_size_formatted,
+                'affected_activities_count' => $this->summary_stats->affected_activities_count,
+            );
+
+            // Prepare file data for template
+            $data['files'] = $this->prepare_files_for_template();
+        } else {
+            $data['no_files_message'] = get_string('no_unused_files', 'report_fileusechecker');
         }
-        
-        // Pass necessary strings to the template
-        $data->strings = [
-            'title' => get_string('title', 'report_fileusechecker'),
-            'description' => get_string('description', 'report_fileusechecker'),
-            'file_name' => get_string('file_name', 'report_fileusechecker'),
-            'file_size' => get_string('file_size', 'report_fileusechecker'),
-            'location' => get_string('location', 'report_fileusechecker'),
-            'activity_type' => get_string('activity_type', 'report_fileusechecker'),
-            'select' => get_string('select', 'report_fileusechecker'),
-            'delete_selected' => get_string('delete_selected', 'report_fileusechecker'),
-            'no_unused_files' => get_string('no_unused_files', 'report_fileusechecker'),
-            'total_unused_files' => get_string('total_unused_files', 'report_fileusechecker', $data->summary_stats->total_files),
-            'total_file_size' => get_string('total_file_size', 'report_fileusechecker', $data->summary_stats->total_size_formatted),
-            'affected_activities' => get_string('affected_activities', 'report_fileusechecker', $data->summary_stats->affected_activities_count),
-            'delete_confirmation' => get_string('delete_confirmation', 'report_fileusechecker', -1), // Placeholder for JS
-        ];
+
+        // Add capabilities and permissions
+        $data['permissions'] = array(
+            'can_view' => true,
+            'can_delete' => $this->can_delete,
+        );
+
+        // Add URLs
+        $data['ajax_delete_url'] = new \moodle_url('/report/fileusechecker/ajax_delete.php', array(
+            'courseid' => $this->courseid,
+            'sesskey' => sesskey(),
+        ));
+
+        $data['refresh_url'] = new \moodle_url('/report/fileusechecker/index.php', array(
+            'courseid' => $this->courseid,
+        ));
 
         return $data;
+    }
+
+    /**
+     * Prepare files for template rendering
+     *
+     * @return array Array of prepared file data
+     */
+    private function prepare_files_for_template() {
+        $files_for_template = array();
+
+        foreach ($this->unused_files as $file) {
+            $files_for_template[] = array(
+                'fileid' => $file->fileid,
+                'filename' => $file->filename,
+                'filesize' => $file->filesizeformatted,
+                'activitytype' => $file->activitytype,
+                'location' => $file->location,
+                'locationurl' => $file->locationurl->out(false),
+                'mimetype' => $file->mimetype,
+            );
+        }
+
+        return $files_for_template;
+    }
+
+    /**
+     * Get course ID
+     *
+     * @return int Course ID
+     */
+    public function get_courseid() {
+        return $this->courseid;
+    }
+
+    /**
+     * Get unused files
+     *
+     * @return array Array of unused file objects
+     */
+    public function get_unused_files() {
+        return $this->unused_files;
+    }
+
+    /**
+     * Get summary statistics
+     *
+     * @return object Summary statistics object
+     */
+    public function get_summary_stats() {
+        return $this->summary_stats;
+    }
+
+    /**
+     * Check if user can delete
+     *
+     * @return bool True if user can delete
+     */
+    public function can_delete() {
+        return $this->can_delete;
+    }
+
+    /**
+     * Get title
+     *
+     * @return string Title
+     */
+    public function get_title() {
+        return $this->title;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string Description
+     */
+    public function get_description() {
+        return $this->description;
+    }
+
+    /**
+     * Set title
+     *
+     * @param string $title Title to set
+     */
+    public function set_title($title) {
+        $this->title = $title;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description Description to set
+     */
+    public function set_description($description) {
+        $this->description = $description;
+    }
+
+    /**
+     * Set unused files
+     *
+     * @param array $files Array of file objects
+     */
+    public function set_unused_files($files) {
+        $this->unused_files = $files;
+    }
+
+    /**
+     * Set summary statistics
+     *
+     * @param object $stats Statistics object
+     */
+    public function set_summary_stats($stats) {
+        $this->summary_stats = $stats;
+    }
+
+    /**
+     * Set can delete permission
+     *
+     * @param bool $can_delete Whether user can delete
+     */
+    public function set_can_delete($can_delete) {
+        $this->can_delete = $can_delete;
+    }
+
+    /**
+     * Get file count
+     *
+     * @return int Number of unused files
+     */
+    public function get_file_count() {
+        return count($this->unused_files);
+    }
+
+    /**
+     * Check if there are any unused files
+     *
+     * @return bool True if there are unused files
+     */
+    public function has_unused_files() {
+        return $this->get_file_count() > 0;
+    }
+
+    /**
+     * Get total storage size
+     *
+     * @return int Total size in bytes
+     */
+    public function get_total_storage() {
+        return $this->summary_stats->total_size ?? 0;
+    }
+
+    /**
+     * Get affected activities count
+     *
+     * @return int Number of affected activities
+     */
+    public function get_affected_activities_count() {
+        return $this->summary_stats->affected_activities_count ?? 0;
     }
 }
