@@ -1,100 +1,746 @@
 /**
- * Styling for the File Use Checker Report (report_fileusechecker)
+ * File Use Checker Report - Styling
  *
  * @package    report_fileusechecker
- * @copyright  2025 Your Name
+ * @copyright  2025
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/* General Report Container */
-.report_fileusechecker {
+/* ========================================
+   Root Variables & Theme
+   ======================================== */
+
+:root {
+    --fuc-primary: #007bff;
+    --fuc-danger: #dc3545;
+    --fuc-success: #28a745;
+    --fuc-warning: #ffc107;
+    --fuc-info: #17a2b8;
+    --fuc-light: #f8f9fa;
+    --fuc-dark: #343a40;
+    --fuc-border: #dee2e6;
+    --fuc-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --fuc-shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ========================================
+   Main Container
+   ======================================== */
+
+.report-fileusechecker {
     padding: 20px;
+    background-color: #ffffff;
 }
 
-/* --- Summary Statistics Card --- */
-.report_fileusechecker .card-header {
-    background-color: #007bff; /* Primary Moodle-like blue */
+.report-fileusechecker * {
+    box-sizing: border-box;
 }
 
-.report_fileusechecker .card-title {
+/* ========================================
+   Header Section
+   ======================================== */
+
+.report-header {
+    border-bottom: 2px solid var(--fuc-border);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.report-header .report-title {
+    font-size: 28px;
     font-weight: 600;
+    color: var(--fuc-dark);
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.report_fileusechecker .card-body .border.rounded {
-    transition: background-color 0.3s ease;
-    border: 1px solid #dee2e6 !important;
-    padding: 15px;
+.report-header .report-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 28px;
+    background-color: var(--fuc-primary);
+    border-radius: 2px;
 }
 
-.report_fileusechecker .card-body .border.rounded:hover {
-    background-color: #f8f9fa; /* Light hover background */
+.report-header .text-muted {
+    font-size: 14px;
+    color: #6c757d;
 }
 
-.report_fileusechecker .card-body h3 {
-    font-size: 1.8rem;
+.report-header .d-flex {
+    display: flex;
+}
+
+.report-header .justify-content-between {
+    justify-content: space-between;
+}
+
+.report-header .align-items-center {
+    align-items: center;
+}
+
+.report-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.report-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--fuc-border);
+    background-color: white;
+    color: var(--fuc-primary);
+}
+
+.report-actions .btn:hover {
+    background-color: var(--fuc-light);
+    border-color: var(--fuc-primary);
+}
+
+/* ========================================
+   Alert Messages
+   ======================================== */
+
+.alert {
+    padding: 12px 20px;
+    border-radius: 4px;
+    border-left: 4px solid var(--fuc-border);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.alert i {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left-color: var(--fuc-success);
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left-color: var(--fuc-info);
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left-color: var(--fuc-danger);
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left-color: var(--fuc-warning);
+}
+
+.alert-dismissible {
+    position: relative;
+    padding-right: 40px;
+}
+
+.alert .close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.alert .close:hover {
+    opacity: 1;
+}
+
+/* ========================================
+   Summary Section
+   ======================================== */
+
+.summary-section {
+    margin-bottom: 40px;
+}
+
+.summary-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: var(--fuc-shadow);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    height: 100%;
+}
+
+.summary-card:hover {
+    box-shadow: var(--fuc-shadow-lg);
+    transform: translateY(-2px);
+}
+
+.summary-card .card-body {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.summary-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.summary-card:nth-child(1) .summary-icon {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: var(--fuc-primary);
+}
+
+.summary-card:nth-child(2) .summary-icon {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: var(--fuc-info);
+}
+
+.summary-card:nth-child(3) .summary-icon {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--fuc-success);
+}
+
+.summary-card:nth-child(4) .summary-icon {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: var(--fuc-warning);
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px 0;
+}
+
+.summary-value {
+    font-size: 32px;
     font-weight: 700;
-    color: #007bff;
-    margin-bottom: 0.2rem;
+    color: var(--fuc-dark);
+    margin: 0;
+    line-height: 1;
 }
 
-.report_fileusechecker .card-body p {
-    font-size: 0.9rem;
-    margin-bottom: 0;
+/* ========================================
+   Files Table Section
+   ======================================== */
+
+.files-table-section {
+    margin-top: 40px;
 }
 
-/* --- Action Bar --- */
-.report_fileusechecker .d-flex.bg-light {
-    border: 1px solid #e9ecef;
+.section-header {
+    border-bottom: 2px solid var(--fuc-border);
+    padding-bottom: 16px;
+    margin-bottom: 20px;
 }
 
-/* Delete Button styling */
-#delete-selected-btn {
+.section-title {
+    font-size: 20px;
     font-weight: 600;
-    background-color: #dc3545; /* Danger red */
-    border-color: #dc3545;
+    color: var(--fuc-dark);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-#delete-selected-btn:disabled {
-    opacity: 0.65;
+.section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background-color: var(--fuc-primary);
+    border-radius: 2px;
+}
+
+/* ========================================
+   Action Buttons
+   ======================================== */
+
+.action-buttons-wrapper {
+    margin-bottom: 20px;
+}
+
+.btn-group-custom {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--fuc-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.btn:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* --- File List Table --- */
-.report_fileusechecker table {
-    margin-top: 15px;
-    border: 1px solid #dee2e6;
+.btn-outline-secondary {
+    background-color: white;
+    color: var(--fuc-dark);
+    border-color: var(--fuc-border);
 }
 
-.report_fileusechecker thead th {
-    background-color: #e9ecef;
+.btn-outline-secondary:hover:not(:disabled) {
+    background-color: var(--fuc-light);
+    border-color: var(--fuc-dark);
+}
+
+.btn-danger {
+    background-color: var(--fuc-danger);
+    color: white;
+    border-color: var(--fuc-danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: #c82333;
+    border-color: #c82333;
+}
+
+.btn-sm {
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
     font-weight: 600;
-    vertical-align: middle;
 }
 
-.report_fileusechecker tbody tr:hover {
-    background-color: #f8f9fa;
+.badge-info {
+    background-color: #e7f3ff;
+    color: #004085;
 }
 
-.report_fileusechecker td {
-    vertical-align: middle;
-    padding: 0.75rem;
+.badge-secondary {
+    background-color: #e2e3e5;
+    color: #383d41;
 }
 
-/* Text Truncation for File Name */
-.report_fileusechecker td:nth-child(2) {
-    max-width: 350px;
+.badge-light {
+    background-color: white;
+    color: var(--fuc-dark);
+    border: 1px solid var(--fuc-border);
+}
+
+/* ========================================
+   Table Styling
+   ======================================== */
+
+.table-responsive {
+    border-radius: 8px;
     overflow: hidden;
-    text-overflow: ellipsis;
+    box-shadow: var(--fuc-shadow);
+}
+
+.file-table {
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.file-table thead {
+    background-color: var(--fuc-light);
+    border-bottom: 2px solid var(--fuc-border);
+}
+
+.file-table th {
+    padding: 16px 12px;
+    font-weight: 600;
+    color: var(--fuc-dark);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
     white-space: nowrap;
 }
 
-.report_fileusechecker td strong {
-    font-weight: 500;
+.file-table tbody tr {
+    border-bottom: 1px solid var(--fuc-border);
+    transition: background-color 0.2s ease;
+}
+
+.file-table tbody tr:hover {
+    background-color: var(--fuc-light);
+}
+
+.file-table td {
+    padding: 14px 12px;
+    font-size: 14px;
+    color: var(--fuc-dark);
+    vertical-align: middle;
+}
+
+.checkbox-column {
+    width: 50px;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+    border: 1px solid var(--fuc-border);
+    border-radius: 3px;
+    accent-color: var(--fuc-primary);
+}
+
+.form-check-input:checked {
+    background-color: var(--fuc-primary);
+    border-color: var(--fuc-primary);
+}
+
+/* ========================================
+   File List Item
+   ======================================== */
+
+.file-item-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-icon {
+    width: 24px;
+    height: 24px;
+    color: #6c757d;
+    flex-shrink: 0;
+}
+
+.file-name {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    color: var(--fuc-dark);
+}
+
+.location-link {
+    color: var(--fuc-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.location-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.location-link i {
+    font-size: 12px;
+}
+
+/* ========================================
+   Modal Dialog
+   ======================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.show {
     display: block;
 }
 
-/* Filepath smaller text */
-.report_fileusechecker td .small.d-block {
-    font-size: 0.75rem;
-    line-height: 1.2;
+.modal-dialog {
+    position: relative;
+    width: auto;
+    margin: 60px auto;
+    max-width: 500px;
+}
+
+.modal-content {
+    position: relative;
+    background-color: white;
+    border: 1px solid var(--fuc-border);
+    border-radius: 8px;
+    box-shadow: var(--fuc-shadow-lg);
+    outline: 0;
+}
+
+.modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--fuc-border);
+}
+
+.modal-title {
+    margin: 0;
+    line-height: 1.5;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--fuc-dark);
+}
+
+.modal-header .close {
+    float: none;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: 0.5;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.modal-header .close:hover {
+    opacity: 0.75;
+}
+
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: 20px;
+}
+
+.modal-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 20px;
+    border-top: 1px solid var(--fuc-border);
+    gap: 10px;
+}
+
+.modal-footer .btn {
+    margin: 0;
+}
+
+/* ========================================
+   Loading Indicator
+   ======================================== */
+
+#loadingIndicator {
+    display: none;
+    padding: 16px;
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-radius: 4px;
+    margin: 20px 0;
+    text-align: center;
+    border-left: 4px solid var(--fuc-info);
+}
+
+#loadingIndicator i {
+    margin-right: 8px;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 1200px) {
+    .summary-section .row [class*='col-'] {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 768px) {
+    .report-fileusechecker {
+        padding: 15px;
+    }
+
+    .report-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+
+    .report-header .report-title {
+        font-size: 22px;
+    }
+
+    .report-header .d-flex {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .report-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .summary-section .row [class*='col-'] {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .summary-card .card-body {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .summary-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+    }
+
+    .summary-value {
+        font-size: 24px;
+    }
+
+    .file-table th,
+    .file-table td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    .file-table .checkbox-column {
+        width: 40px;
+    }
+
+    .btn-group-custom {
+        flex-direction: column;
+    }
+
+    .btn-group-custom .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .table-responsive {
+        font-size: 12px;
+    }
+
+    .modal-dialog {
+        margin: 20px auto;
+        max-width: calc(100% - 40px);
+    }
+}
+
+@media (max-width: 480px) {
+    .report-header .report-title {
+        font-size: 18px;
+    }
+
+    .summary-value {
+        font-size: 20px;
+    }
+
+    .file-table {
+        font-size: 11px;
+    }
+
+    .file-table th,
+    .file-table td {
+        padding: 8px 4px;
+    }
+
+    .section-title {
+        font-size: 16px;
+    }
+}
+
+/* ========================================
+   Animations
+   ======================================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.fa-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+
+@media print {
+    .report-actions,
+    .action-buttons-wrapper,
+    .modal {
+        display: none !important;
+    }
+
+    .report-fileusechecker {
+        background-color: white;
+        padding: 0;
+    }
+
+    .file-table {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
 }
