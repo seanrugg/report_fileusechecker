@@ -165,3 +165,74 @@ $string['please_wait'] = 'Please wait...';
 $string['no_permission'] = 'You do not have permission to access this report.';
 $string['course_not_found'] = 'Course not found.';
 $string['session_expired'] = 'Your session has expired. Please reload the page and try again.';
+
+// ========================================
+// Settings Page Strings
+// ========================================
+
+// General Settings
+$string['general_settings'] = 'General Settings';
+$string['general_settings_desc'] = 'Configure general behavior of the File Use Checker plugin.';
+$string['enabled'] = 'Enable File Use Checker';
+$string['enabled_desc'] = 'When enabled, the File Use Checker report will be available to course managers. Disable this to temporarily hide the report from all users.';
+
+// Scanning Settings
+$string['scanning_settings'] = 'Scanning Settings';
+$string['scanning_settings_desc'] = 'Configure how the plugin scans for unused files.';
+$string['cache_ttl'] = 'Cache Duration (seconds)';
+$string['cache_ttl_desc'] = 'How long to cache scan results (in seconds). Shorter duration = more accurate results but higher CPU usage. Default is 300 seconds (5 minutes).';
+$string['max_files_per_scan'] = 'Maximum Files Per Scan';
+$string['max_files_per_scan_desc'] = 'Maximum number of files to process in a single scan. Courses with more files will take longer to scan. Adjust based on your server resources.';
+$string['file_size_threshold'] = 'File Size Threshold (bytes)';
+$string['file_size_threshold_desc'] = 'Minimum file size to track (in bytes). Files smaller than this are ignored. Default is 1048576 bytes (1 MB). Use 0 to track all files.';
+
+// Deletion Settings
+$string['deletion_settings'] = 'Deletion Settings';
+$string['deletion_settings_desc'] = 'Configure file deletion behavior and safety features.';
+$string['allow_deletion'] = 'Allow File Deletion';
+$string['allow_deletion_desc'] = 'When enabled, users with appropriate permissions can delete unused files. When disabled, only viewing the report is allowed.';
+$string['require_confirmation'] = 'Require Confirmation Before Deletion';
+$string['require_confirmation_desc'] = 'When enabled, users must confirm deletion in a modal dialog. Recommended for safety.';
+$string['log_deletions'] = 'Log File Deletions';
+$string['log_deletions_desc'] = 'When enabled, all file deletions are logged to the Moodle event log for audit purposes.';
+
+// Detection Settings
+$string['detection_settings'] = 'File Detection Settings';
+$string['detection_settings_desc'] = 'Configure which files are included in the unused file scan.';
+$string['include_hidden_files'] = 'Include Hidden Files';
+$string['include_hidden_files_desc'] = 'When enabled, files starting with a dot (.) are included in scans. When disabled, these are skipped as they are typically system files.';
+$string['include_backup_files'] = 'Include Backup Files';
+$string['include_backup_files_desc'] = 'When enabled, files with names containing "backup" or "archive" are included. When disabled, these are skipped to avoid false positives.';
+$string['ignored_file_types'] = 'Ignored File Types (comma-separated extensions)';
+$string['ignored_file_types_desc'] = 'File extensions to ignore during scanning (comma-separated, no dots). Examples: bak, tmp, swp, lock. Leave empty to scan all file types.';
+
+// Display Settings
+$string['display_settings'] = 'Display & UI Settings';
+$string['display_settings_desc'] = 'Configure how the report is displayed to users.';
+$string['items_per_page'] = 'Items Per Page';
+$string['items_per_page_desc'] = 'Number of files to display per page in the report table. Higher values show more files but may impact performance on slow connections.';
+$string['show_file_icons'] = 'Show File Type Icons';
+$string['show_file_icons_desc'] = 'When enabled, file type icons are displayed next to file names for easier visual identification.';
+$string['theme_color'] = 'UI Theme Color';
+$string['theme_color_desc'] = 'Select the color scheme for the report interface.';
+$string['theme_light'] = 'Light Theme';
+$string['theme_dark'] = 'Dark Theme';
+$string['theme_auto'] = 'Auto (Follow System)';
+
+// Notification Settings
+$string['notification_settings'] = 'Notification Settings';
+$string['notification_settings_desc'] = 'Configure email notifications about unused files.';
+$string['notify_admin'] = 'Notify Site Admin of Large Unused File Collections';
+$string['notify_admin_desc'] = 'When enabled, the site administrator receives an email notification when a course contains unused files exceeding the threshold.';
+$string['notify_threshold_mb'] = 'Notification Threshold (MB)';
+$string['notify_threshold_mb_desc'] = 'Send notifications when unused files in a course exceed this size (in megabytes). Set to 0 to disable notifications.';
+
+// Advanced Settings
+$string['advanced_settings'] = 'Advanced Settings';
+$string['advanced_settings_desc'] = 'Advanced configuration options for developers and experienced administrators.';
+$string['debug_mode'] = 'Enable Debug Mode';
+$string['debug_mode_desc'] = 'When enabled, additional debugging information is logged. Enable only for troubleshooting purposes, then disable in production.';
+
+// Information Section
+$string['info_section'] = 'Plugin Information';
+$string['plugin_info'] = 'About File Use Checker';
