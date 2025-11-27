@@ -58,6 +58,15 @@ $page = new page_renderable($courseid, $unused_files, $summary_stats, $can_delet
 // Add CSS
 $PAGE->requires->css('/report/fileusechecker/styles.css');
 
+// Add JavaScript module
+if ($can_delete) {
+    $ajax_url = new moodle_url('/report/fileusechecker/ajax_delete.php', array(
+        'courseid' => $courseid,
+        'sesskey' => sesskey(),
+    ));
+    $PAGE->requires->js_call_amd('report_fileusechecker/report', 'init', array($courseid, $can_delete, $ajax_url->out(false)));
+}
+
 // Output the page header
 echo $OUTPUT->header();
 
